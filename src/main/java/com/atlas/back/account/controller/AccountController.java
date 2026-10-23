@@ -1,7 +1,11 @@
 package com.atlas.back.account.controller;
 
+import com.atlas.back.account.dto.AccountMapper;
+import com.atlas.back.account.dto.AccountResponse;
+import com.atlas.back.account.dto.CreateAccountRequest;
 import com.atlas.back.account.model.Account;
 import com.atlas.back.account.service.IAccountService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,20 +19,27 @@ import java.util.List;
 public class AccountController {
 
     private final IAccountService accountService;
-
+    private final AccountMapper accountMapper;
     @PostMapping
-    public ResponseEntity<Account> create(@RequestBody Account account) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(accountService.create(account));
+    public ResponseEntity<AccountResponse> create(@RequestBody @Valid CreateAccountRequest request) {
+        Account account = accountMapper.toEntity(request);
+
+        Account saved = accountService.create(account);
+        return ResponseEntity.status(HttpStatus.CREATED).body(accountMapper.toResponse(saved));
     }
 
     @GetMapping
-    public ResponseEntity<List<Account>> findAll() {
-        return ResponseEntity.ok(accountService.findAll());
+    public ResponseEntity<List<AccountResponse>> findAll() {
+        List<AccountResponse> accounts = accountService.findAll()
+                .stream()
+                .map(accountMapper::toResponse)
+                .toList();
+        return ResponseEntity.ok(accounts);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Account> findById(@PathVariable Long id) {
-        return ResponseEntity.ok(accountService.findById(id));
+    public ResponseEntity<AccountResponse> findById(@PathVariable Long id) {
+        return ResponseEntity.ok(accountMapper.toResponse(accountService.findById(id)));
     }
 
 
