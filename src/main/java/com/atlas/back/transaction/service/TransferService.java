@@ -16,12 +16,16 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
-public class TransferService implements ITransferService {
+public class TransferService extends TransactionProcessor<TransferContext> implements ITransferService {
 
     private final AccountRepository accountRepository;
-    private final TransactionRepository transactionRepository;
     private final List<FeeCalcuilator> feeCalcuilators;
+
+    public TransferService(TransactionRepository transactionRepository, AccountRepository accountRepository, List<FeeCalcuilator> feeCalcuilators) {
+        super(transactionRepository);
+        this.accountRepository = accountRepository;
+        this.feeCalcuilators = feeCalcuilators;
+    }
 
     @Override
     @Transactional
@@ -32,50 +36,58 @@ public class TransferService implements ITransferService {
         Account to = accountRepository.findById(toId)
                 .orElseThrow(() -> new AccountNotFoundException(toId));
 
+        return process(new TransferContext(from, to, amount));
+    }
+
+    @Override
+    protected void validate(TransferContext ctx) {
         // Validar que la cuenta esté activa
-        if (!"ACTIVE".equals(from.getStatus())) {
-            throw new AccountNotActiveException(fromId,from.getStatus());
+        if (!"ACTIVE".equals(ctx.from().getStatus())) {
+            throw new AccountNotActiveException(ctx.from().getId(), ctx.from().getStatus());
         }
-        if (!"ACTIVE".equals(to.getStatus())) {
-            throw new AccountNotActiveException(toId,to.getStatus());
+        if (!"ACTIVE".equals(ctx.to().getStatus())) {
+            throw new AccountNotActiveException(ctx.to().getId(), ctx.to().getStatus());
         }
 
         // Validar fondos
-        if (from.getBalance().compareTo(amount) < 0) {
-            throw new InsufficientFundsException(fromId, from.getBalance(),amount);
+        if (ctx.from().getBalance().compareTo(ctx.amount()) < 0) {
+            throw new InsufficientFundsException(ctx.from().getId(), ctx.from().getBalance(), ctx.amount());
         }
 
+    }
+
+    @Override
+    protected BigDecimal calculateFee(TransferContext ctx) {
         // Calcular comisión — hardcodeada
-        BigDecimal fee= feeCalcuilators.stream()
-                .filter( fc->fc.supports(from.getType()))
+
+        return feeCalcuilators.stream()
+                .filter(fc -> fc.supports(ctx.from().getType()))
                 .findFirst()
-                .orElseThrow(()-> new RuntimeException(" No hay calculador para el tipo "+ from.getType()))
-                .calculate(amount);
+                .orElseThrow(() -> new RuntimeException(" No hay calculador para el tipo " + ctx.from().getType()))
+                .calculate(ctx.amount());
+    }
 
-        if ("SAVINGS".equals(from.getType())) {
-            fee = amount.multiply(new BigDecimal("0.01"));
-        } else if ("CHECKING".equals(from.getType())) {
-            fee = amount.multiply(new BigDecimal("0.015"));
-        } else {
-            fee = BigDecimal.ZERO;
-        }
-
+    @Override
+    protected void execute(TransferContext ctx, BigDecimal fee) {
         // Actualizar saldos
-        from.setBalance(from.getBalance().subtract(amount).subtract(fee));
-        to.setBalance(to.getBalance().add(amount));
-        accountRepository.save(from);
-        accountRepository.save(to);
+        ctx.from().setBalance(ctx.from().getBalance().subtract(ctx.amount()).subtract(fee));
+        ctx.to().setBalance(ctx.to().getBalance().add(ctx.amount()));
+        accountRepository.save(ctx.from());
+        accountRepository.save(ctx.to());
+    }
+
+    @Override
+    protected Transaction save(TransferContext ctx, BigDecimal fee) {
 
         // Crear transacción
         Transaction transaction = new Transaction();
         transaction.setType("TRANSFER");
-        transaction.setSourceAccountId(fromId);
-        transaction.setTargetAccountId(toId);
-        transaction.setAmount(amount);
+        transaction.setSourceAccountId(ctx.from().getId());
+        transaction.setTargetAccountId(ctx.to().getId());
+        transaction.setAmount(ctx.amount());
         transaction.setFee(fee);
         transaction.setStatus("EXECUTED");
 
         return transactionRepository.save(transaction);
     }
-
 }
