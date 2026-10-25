@@ -7,8 +7,10 @@ import com.atlas.back.transaction.exception.InsufficientFundsException;
 import com.atlas.back.transaction.model.Transaction;
 import com.atlas.back.account.repository.AccountRepository;
 import com.atlas.back.transaction.repository.TransactionRepository;
+import com.atlas.back.transaction.service.event.TransactionExecuteEvent;
 import com.atlas.back.transaction.service.factory.TransactionFactory;
 import com.atlas.back.transaction.service.fee.FeeCalcuilator;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,11 +22,14 @@ public class TransferService extends TransactionProcessor<TransferContext> imple
 
     private final AccountRepository accountRepository;
     private final List<FeeCalcuilator> feeCalcuilators;
+    private final ApplicationEventPublisher eventPublisher;
 
-    public TransferService(TransactionRepository transactionRepository, AccountRepository accountRepository, List<FeeCalcuilator> feeCalcuilators) {
+    public TransferService(TransactionRepository transactionRepository, AccountRepository accountRepository
+            , List<FeeCalcuilator> feeCalcuilators, ApplicationEventPublisher eventPublisher) {
         super(transactionRepository);
         this.accountRepository = accountRepository;
         this.feeCalcuilators = feeCalcuilators;
+        this.eventPublisher = eventPublisher;
     }
 
     @Override
@@ -36,7 +41,19 @@ public class TransferService extends TransactionProcessor<TransferContext> imple
         Account to = accountRepository.findById(toId)
                 .orElseThrow(() -> new AccountNotFoundException(toId));
 
-        return process(new TransferContext(from, to, amount));
+        Transaction transaction = process(new TransferContext(from, to, amount));
+
+        eventPublisher.publishEvent(new TransactionExecuteEvent(transaction.getId(),
+                transaction.getType(),
+                transaction.getSourceAccountId(),
+                transaction.getTargetAccountId(),
+                transaction.getAmount(),
+                transaction.getFee()
+
+
+                ));
+
+        return transaction;
     }
 
     @Override
