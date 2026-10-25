@@ -1,5 +1,6 @@
 package com.atlas.back.transaction.service.fee;
 
+import com.atlas.back.account.model.AccountType;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -10,7 +11,7 @@ import java.math.BigDecimal;
 @Order()
 public class DeafultFeeCalculator implements  FeeCalcuilator {
     @Override
-    public boolean supports(String accountType) {
+    public boolean supports(AccountType accountType) {
         return true;
     }
 

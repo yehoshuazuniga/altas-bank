@@ -1,6 +1,7 @@
 package com.atlas.back.transaction.service.fee;
 
 
+import com.atlas.back.account.model.AccountType;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
@@ -13,8 +14,8 @@ public class PremiumFeeCalculator implements  FeeCalcuilator{
 
 
     @Override
-    public boolean supports(String accountType) {
-        return "PREMUM".equalsIgnoreCase(accountType);
+    public boolean supports(AccountType accountType) {
+        return accountType.equals(AccountType.PREMIUM);
     }
 
     @Override
