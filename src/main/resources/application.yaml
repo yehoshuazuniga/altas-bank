@@ -16,5 +16,10 @@ spring:
     console:
       enabled: true
       path: /h2-console
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/atlas-bank
 server:
   port: 8080
