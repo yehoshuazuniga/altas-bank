@@ -1,7 +1,6 @@
-package com.atlas.back.transaction.service;
+package com.atlas.back.transaction.service.transfer;
 
 import com.atlas.back.account.model.Account;
-import com.atlas.back.transaction.service.fee.FeeCalcuilator;
 
 import java.math.BigDecimal;
 

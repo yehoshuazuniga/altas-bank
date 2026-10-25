@@ -1,4 +1,4 @@
-package com.atlas.back.transaction.service;
+package com.atlas.back.transaction.service.transfer;
 
 import com.atlas.back.account.exception.AccountNotFoundException;
 import com.atlas.back.account.model.Account;
@@ -7,8 +7,8 @@ import com.atlas.back.transaction.exception.InsufficientFundsException;
 import com.atlas.back.transaction.model.Transaction;
 import com.atlas.back.account.repository.AccountRepository;
 import com.atlas.back.transaction.repository.TransactionRepository;
+import com.atlas.back.transaction.service.factory.TransactionFactory;
 import com.atlas.back.transaction.service.fee.FeeCalcuilator;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -79,14 +79,7 @@ public class TransferService extends TransactionProcessor<TransferContext> imple
     @Override
     protected Transaction save(TransferContext ctx, BigDecimal fee) {
 
-        // Crear transacción
-        Transaction transaction = new Transaction();
-        transaction.setType("TRANSFER");
-        transaction.setSourceAccountId(ctx.from().getId());
-        transaction.setTargetAccountId(ctx.to().getId());
-        transaction.setAmount(ctx.amount());
-        transaction.setFee(fee);
-        transaction.setStatus("EXECUTED");
+        Transaction transaction = TransactionFactory.createTarnsfer(ctx, fee);
 
         return transactionRepository.save(transaction);
     }

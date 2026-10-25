@@ -1,4 +1,4 @@
-package com.atlas.back.transaction.service;
+package com.atlas.back.transaction.service.transfer;
 
 import com.atlas.back.transaction.model.Transaction;
 import com.atlas.back.transaction.repository.TransactionRepository;
