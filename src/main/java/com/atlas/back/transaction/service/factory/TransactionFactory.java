@@ -12,14 +12,14 @@ public class TransactionFactory {
 
     public static Transaction createTarnsfer(TransferContext ctx, BigDecimal fee) {
         // Crear transacción
-        Transaction transaction = new Transaction();
-        transaction.setType(TransactionType.TRANSFER);
-        transaction.setCreatedBy("SYSTEM");
-        transaction.setSourceAccountId(ctx.from().getId());
-        transaction.setTargetAccountId(ctx.to().getId());
-        transaction.setAmount(ctx.amount());
-        transaction.setFee(fee);
-        transaction.setStatus(TransactionStatus.PENDING);
+        Transaction transaction =  Transaction.builder()
+                .type(TransactionType.TRANSFER)
+                .createdBy("SYSTEM")
+                .sourceAccountId(ctx.from().getId())
+                .targetAccountId(ctx.to().getId())
+                .amount(ctx.amount())
+                .fee(fee)
+                .status(TransactionStatus.PENDING).build();
 
         transaction.advanceTo(new PendingState());
         return transaction;
