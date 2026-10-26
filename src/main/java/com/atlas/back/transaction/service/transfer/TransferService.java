@@ -14,6 +14,7 @@ import com.atlas.back.transaction.service.factory.TransactionFactory;
 import com.atlas.back.transaction.service.fee.FeeCalcuilator;
 import com.atlas.back.transaction.service.fraud.FraudCheckResult;
 import com.atlas.back.transaction.service.fraud.FraudChecker;
+import com.atlas.back.transaction.validation.chain.TransferValidation;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,16 +29,16 @@ public class TransferService extends TransactionProcessor<TransferContext> imple
     private final AccountRepository accountRepository;
     private final List<FeeCalcuilator> feeCalcuilators;
     private final ApplicationEventPublisher eventPublisher;
-    private final FraudChecker fraudChecker;
+    private final List<TransferValidation> validators;
 
     public TransferService(TransactionRepository transactionRepository, AccountRepository accountRepository,
                            List<FeeCalcuilator> feeCalcuilators, ApplicationEventPublisher eventPublisher,
-                           FraudChecker fraudChecker) {
+                           List<TransferValidation> validators) {
         super(transactionRepository);
         this.accountRepository = accountRepository;
         this.feeCalcuilators = feeCalcuilators;
         this.eventPublisher = eventPublisher;
-        this.fraudChecker = fraudChecker;
+        this.validators = validators;
     }
 
     @Override
@@ -66,24 +67,8 @@ public class TransferService extends TransactionProcessor<TransferContext> imple
 
     @Override
     protected void validate(TransferContext ctx) {
-        // Validar que la cuenta esté activa
-        if (ctx.from().getStatus() != AccountStatus.ACTIVE) {
-            throw new AccountNotActiveException(ctx.from().getId(), ctx.from().getStatus().name());
-        }
-        if (ctx.to().getStatus() != AccountStatus.ACTIVE) {
-            throw new AccountNotActiveException(ctx.to().getId(), ctx.to().getStatus().name());
-        }
 
-        // Validar fondos
-        if (ctx.from().getBalance().compareTo(ctx.amount()) < 0) {
-            throw new InsufficientFundsException(ctx.from().getId(), ctx.from().getBalance(), ctx.amount());
-        }
-
-        FraudCheckResult fraudCheckResult = fraudChecker.check(ctx.from().getId(), ctx.to().getBalance());
-
-        if(fraudCheckResult.blocked()){
-            throw new FraudCheckException(fraudCheckResult.reason());
-        }
+        validators.forEach(validator -> validator.validate(ctx));
     }
 
     @Override
