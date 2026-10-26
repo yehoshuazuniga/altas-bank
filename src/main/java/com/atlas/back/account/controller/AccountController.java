@@ -3,7 +3,9 @@ package com.atlas.back.account.controller;
 import com.atlas.back.account.dto.AccountMapper;
 import com.atlas.back.account.dto.AccountResponse;
 import com.atlas.back.account.dto.CreateAccountRequest;
+import com.atlas.back.account.dto.DashboardResponse;
 import com.atlas.back.account.model.Account;
+import com.atlas.back.account.service.AccountDashboardFacade;
 import com.atlas.back.account.service.IAccountService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +22,13 @@ public class AccountController {
 
     private final IAccountService accountService;
     private final AccountMapper accountMapper;
+    private final AccountDashboardFacade accountDashboardFacade;
+
+    @GetMapping("/{id}/dasboard")
+    public ResponseEntity<DashboardResponse> getDasboardAccount(@PathVariable Long id){
+        return ResponseEntity.ok(accountDashboardFacade.getDashboard(id));
+    }
+
     @PostMapping
     public ResponseEntity<AccountResponse> create(@RequestBody @Valid CreateAccountRequest request) {
         Account account = accountMapper.toEntity(request);
