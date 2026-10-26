@@ -9,13 +9,17 @@ import com.atlas.back.transaction.model.Transaction;
 import com.atlas.back.account.repository.AccountRepository;
 import com.atlas.back.transaction.repository.TransactionRepository;
 import com.atlas.back.transaction.service.event.TransactionExecuteEvent;
+import com.atlas.back.transaction.service.exception.FraudCheckException;
 import com.atlas.back.transaction.service.factory.TransactionFactory;
 import com.atlas.back.transaction.service.fee.FeeCalcuilator;
+import com.atlas.back.transaction.service.fraud.FraudCheckResult;
+import com.atlas.back.transaction.service.fraud.FraudChecker;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.nio.charset.CharacterCodingException;
 import java.util.List;
 
 @Service
@@ -24,13 +28,16 @@ public class TransferService extends TransactionProcessor<TransferContext> imple
     private final AccountRepository accountRepository;
     private final List<FeeCalcuilator> feeCalcuilators;
     private final ApplicationEventPublisher eventPublisher;
+    private final FraudChecker fraudChecker;
 
-    public TransferService(TransactionRepository transactionRepository, AccountRepository accountRepository
-            , List<FeeCalcuilator> feeCalcuilators, ApplicationEventPublisher eventPublisher) {
+    public TransferService(TransactionRepository transactionRepository, AccountRepository accountRepository,
+                           List<FeeCalcuilator> feeCalcuilators, ApplicationEventPublisher eventPublisher,
+                           FraudChecker fraudChecker) {
         super(transactionRepository);
         this.accountRepository = accountRepository;
         this.feeCalcuilators = feeCalcuilators;
         this.eventPublisher = eventPublisher;
+        this.fraudChecker = fraudChecker;
     }
 
     @Override
@@ -52,7 +59,7 @@ public class TransferService extends TransactionProcessor<TransferContext> imple
                 transaction.getFee()
 
 
-                ));
+        ));
 
         return transaction;
     }
@@ -60,10 +67,10 @@ public class TransferService extends TransactionProcessor<TransferContext> imple
     @Override
     protected void validate(TransferContext ctx) {
         // Validar que la cuenta esté activa
-        if (ctx.from().getStatus()!= AccountStatus.ACTIVE) {
+        if (ctx.from().getStatus() != AccountStatus.ACTIVE) {
             throw new AccountNotActiveException(ctx.from().getId(), ctx.from().getStatus().name());
         }
-        if (ctx.to().getStatus()!= AccountStatus.ACTIVE) {
+        if (ctx.to().getStatus() != AccountStatus.ACTIVE) {
             throw new AccountNotActiveException(ctx.to().getId(), ctx.to().getStatus().name());
         }
 
@@ -72,6 +79,11 @@ public class TransferService extends TransactionProcessor<TransferContext> imple
             throw new InsufficientFundsException(ctx.from().getId(), ctx.from().getBalance(), ctx.amount());
         }
 
+        FraudCheckResult fraudCheckResult = fraudChecker.check(ctx.from().getId(), ctx.to().getBalance());
+
+        if(fraudCheckResult.blocked()){
+            throw new FraudCheckException(fraudCheckResult.reason());
+        }
     }
 
     @Override
