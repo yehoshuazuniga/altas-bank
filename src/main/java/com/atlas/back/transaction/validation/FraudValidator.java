@@ -18,7 +18,7 @@ public class FraudValidator implements TransferValidation {
     @Override
     public void validate(TransferContext ctx) {
 
-        FraudCheckResult fraudCheckResult = fraudChecker.check(ctx.from().getId(), ctx.to().getBalance());
+        FraudCheckResult fraudCheckResult = fraudChecker.check(ctx.from().getId(), ctx.to().getBalance().getAmount());
 
         if(fraudCheckResult.blocked()){
             throw new FraudCheckException(fraudCheckResult.reason());

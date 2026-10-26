@@ -3,11 +3,13 @@ package com.atlas.back.transaction.service.transfer;
 import com.atlas.back.account.exception.AccountNotFoundException;
 import com.atlas.back.account.model.Account;
 import com.atlas.back.account.model.AccountStatus;
+import com.atlas.back.shared.model.Money;
 import com.atlas.back.transaction.exception.AccountNotActiveException;
 import com.atlas.back.transaction.exception.InsufficientFundsException;
 import com.atlas.back.transaction.model.Transaction;
 import com.atlas.back.account.repository.AccountRepository;
 import com.atlas.back.transaction.repository.TransactionRepository;
+import com.atlas.back.transaction.service.domain.TransferDomainService;
 import com.atlas.back.transaction.service.event.TransactionExecuteEvent;
 import com.atlas.back.transaction.service.exception.FraudCheckException;
 import com.atlas.back.transaction.service.factory.TransactionFactory;
@@ -30,15 +32,17 @@ public class TransferService extends TransactionProcessor<TransferContext> imple
     private final List<FeeCalcuilator> feeCalcuilators;
     private final ApplicationEventPublisher eventPublisher;
     private final List<TransferValidation> validators;
+    private final TransferDomainService transferDomainService;
 
     public TransferService(TransactionRepository transactionRepository, AccountRepository accountRepository,
                            List<FeeCalcuilator> feeCalcuilators, ApplicationEventPublisher eventPublisher,
-                           List<TransferValidation> validators) {
+                           List<TransferValidation> validators, TransferDomainService transferDomainService) {
         super(transactionRepository);
         this.accountRepository = accountRepository;
         this.feeCalcuilators = feeCalcuilators;
         this.eventPublisher = eventPublisher;
         this.validators = validators;
+        this.transferDomainService = transferDomainService;
     }
 
     @Override
@@ -88,9 +92,16 @@ public class TransferService extends TransactionProcessor<TransferContext> imple
 
     @Override
     protected void execute(TransferContext ctx, BigDecimal fee) {
-        // Actualizar saldos
-        ctx.from().setBalance(ctx.from().getBalance().subtract(ctx.amount()).subtract(fee));
-        ctx.to().setBalance(ctx.to().getBalance().add(ctx.amount()));
+
+//        BigDecimal newFromBalance = ctx.from().getBalance().getAmount().subtract(ctx.amount()).subtract(fee);
+//
+//        // Actualizar saldos
+//        ctx.from().setBalance(Money.of(newFromBalance, ctx.from().getBalance().getCurrency()));
+//
+//        BigDecimal newToBalance = ctx.to().getBalance().getAmount().add(ctx.amount());
+//        ctx.to().setBalance(Money.of(newToBalance, ctx.to().getBalance().getCurrency()));
+
+        transferDomainService.trasnfer(ctx.from(), ctx.to(),  ctx.amount(),fee);
         accountRepository.save(ctx.from());
         accountRepository.save(ctx.to());
     }

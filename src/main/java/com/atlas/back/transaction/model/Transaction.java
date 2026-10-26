@@ -20,6 +20,7 @@ public class Transaction {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private Long id;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
