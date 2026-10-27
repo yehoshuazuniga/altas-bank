@@ -1,5 +1,6 @@
 package com.atlas.back.transaction.controller;
 
+import com.atlas.back.application.port.in.TransferMoneyUseCase;
 import com.atlas.back.transaction.dto.TransactionMapper;
 import com.atlas.back.transaction.dto.TransactionResponse;
 import com.atlas.back.transaction.dto.TransferRequest;
@@ -18,7 +19,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TransactionController {
 
-    private final ITransferService transferService;
+    private final TransferMoneyUseCase transferService;
     private final ITransactionQueryService queryService;
     private final TransactionMapper transactionMapper;
 
