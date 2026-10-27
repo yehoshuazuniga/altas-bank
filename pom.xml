@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.atlas.bank</groupId>
-    <artifactId>atlas-back</artifactId>
+    <artifactId>atlas-bank</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>atlas-back</name>
-    <description>atlas-back</description>
+    <name>atlas-bank</name>
+    <description>atlas-bank</description>
     <url/>
     <licenses>
         <license/>
