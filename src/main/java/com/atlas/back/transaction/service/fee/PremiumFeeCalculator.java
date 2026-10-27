@@ -1,7 +1,7 @@
 package com.atlas.back.transaction.service.fee;
 
 
-import com.atlas.back.account.model.AccountType;
+import com.atlas.back.domain.model.account.AccountType;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 

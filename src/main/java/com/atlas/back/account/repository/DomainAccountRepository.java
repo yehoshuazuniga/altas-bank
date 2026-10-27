@@ -1,6 +1,6 @@
 package com.atlas.back.account.repository;
 
-import com.atlas.back.account.model.Account;
+import com.atlas.back.domain.model.account.Account;
 
 import java.util.List;
 import java.util.Optional;

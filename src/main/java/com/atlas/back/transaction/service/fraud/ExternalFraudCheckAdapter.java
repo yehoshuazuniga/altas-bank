@@ -1,5 +1,6 @@
 package com.atlas.back.transaction.service.fraud;
 
+import com.atlas.back.application.port.out.FraudCheckPort;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -7,7 +8,7 @@ import java.math.BigDecimal;
 
 @Component
 @Slf4j
-public class ExternalFraudCheckAdapter implements FraudChecker {
+public class ExternalFraudCheckAdapter implements FraudChecker, FraudCheckPort {
 
     @Override
     public FraudCheckResult check(Long accountId, BigDecimal amount) {

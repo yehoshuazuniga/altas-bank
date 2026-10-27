@@ -1,4 +1,4 @@
-package com.atlas.back.account.exception;
+package com.atlas.back.domain.exception;
 
 public class AccountNotFoundException extends RuntimeException {
 

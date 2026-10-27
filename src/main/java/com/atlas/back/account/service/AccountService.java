@@ -1,7 +1,6 @@
 package com.atlas.back.account.service;
 
-import com.atlas.back.account.model.Account;
-import com.atlas.back.account.repository.AccountRepository;
+import com.atlas.back.domain.model.account.Account;
 import com.atlas.back.account.repository.DomainAccountRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;

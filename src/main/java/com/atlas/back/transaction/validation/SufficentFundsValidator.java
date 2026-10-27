@@ -1,6 +1,6 @@
 package com.atlas.back.transaction.validation;
 
-import com.atlas.back.transaction.exception.InsufficientFundsException;
+import com.atlas.back.domain.exception.InsufficientFundsException;
 import com.atlas.back.transaction.service.transfer.TransferContext;
 import com.atlas.back.transaction.validation.chain.TransferValidation;
 import org.springframework.core.annotation.Order;

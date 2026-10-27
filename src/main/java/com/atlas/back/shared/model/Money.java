@@ -1,5 +1,6 @@
 package com.atlas.back.shared.model;
 
+import com.atlas.back.domain.model.shared.Currency;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.EnumType;

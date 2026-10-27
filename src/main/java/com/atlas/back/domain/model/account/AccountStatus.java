@@ -1,4 +1,4 @@
-package com.atlas.back.account.model;
+package com.atlas.back.domain.model.account;
 
 public enum AccountStatus {
     ACTIVE,

@@ -1,6 +1,6 @@
 package com.atlas.back.transaction.service;
 
-import com.atlas.back.account.model.Account;
+import com.atlas.back.domain.model.account.Account;
 import com.atlas.back.account.service.IAccountService;
 import lombok.extern.slf4j.Slf4j;
 

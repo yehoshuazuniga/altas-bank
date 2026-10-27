@@ -1,8 +1,8 @@
 package com.atlas.back.account.dto;
 
 
-import com.atlas.back.account.model.Account;
-import com.atlas.back.shared.model.Currency;
+import com.atlas.back.domain.model.account.Account;
+import com.atlas.back.domain.model.shared.Currency;
 import com.atlas.back.shared.model.Email;
 import com.atlas.back.shared.model.Money;
 import org.mapstruct.Mapper;
