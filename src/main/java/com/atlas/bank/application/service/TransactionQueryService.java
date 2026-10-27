@@ -14,7 +14,7 @@ public class TransactionQueryService implements GetTransactionByAccountUseCase {
 
     private final TransactionRepositoryPort transactionRepository;
 @Override
-    public List<Transaction> getByAccountid(Long accountId) {
+    public List<Transaction> getByAccountId(Long accountId) {
         return transactionRepository
                 .findBySourceAccountIdOrTargetAccountId(accountId, accountId);
     }

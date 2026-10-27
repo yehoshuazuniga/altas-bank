@@ -1,8 +1,8 @@
 package com.atlas.bank.infrastructure.adapter.in.rest.dto;
 
-
 import com.atlas.bank.domain.model.account.Account;
 import com.atlas.bank.domain.model.shared.Currency;
+
 import com.atlas.bank.domain.model.shared.Email;
 import com.atlas.bank.domain.model.shared.Money;
 import org.mapstruct.Mapper;
@@ -48,6 +48,4 @@ public interface AccountMapper {
         if (email == null) return null;
         return email.getValue();
     }
-
-
 }

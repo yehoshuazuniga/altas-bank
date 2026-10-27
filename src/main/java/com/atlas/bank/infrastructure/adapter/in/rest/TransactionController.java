@@ -36,7 +36,7 @@ public class TransactionController {
 
     @GetMapping("/{id}/transactions")
     public ResponseEntity<List<TransactionResponse>> getTransaction(@PathVariable Long id) {
-        List<TransactionResponse> responses = queryService.getByAccountid(id).stream()
+        List<TransactionResponse> responses = queryService.getByAccountId(id).stream()
                 .map(transactionMapper::toResponse)
                 .toList();
         return ResponseEntity.ok(responses);

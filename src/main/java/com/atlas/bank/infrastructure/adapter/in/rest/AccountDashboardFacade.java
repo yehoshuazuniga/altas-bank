@@ -24,7 +24,7 @@ public class AccountDashboardFacade {
         Account account = accountService.findById(accointId);
 
         List<TransactionResponse> transaction = transactionQueryService
-                .getByAccountid(accointId)
+                .getByAccountId(accointId)
                 .stream()
                 .map(transactionMapper::toResponse)
                 .toList();
