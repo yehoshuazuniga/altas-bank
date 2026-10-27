@@ -2,45 +2,35 @@ package com.atlas.back.transaction.service.transfer;
 
 import com.atlas.back.account.exception.AccountNotFoundException;
 import com.atlas.back.account.model.Account;
-import com.atlas.back.account.model.AccountStatus;
-import com.atlas.back.shared.model.Money;
-import com.atlas.back.transaction.exception.AccountNotActiveException;
-import com.atlas.back.transaction.exception.InsufficientFundsException;
-import com.atlas.back.transaction.model.Transaction;
 import com.atlas.back.account.repository.AccountRepository;
+import com.atlas.back.account.repository.DomainAccountRepository;
+import com.atlas.back.transaction.model.Transaction;
 import com.atlas.back.transaction.repository.TransactionRepository;
 import com.atlas.back.transaction.service.domain.TransferDomainService;
-import com.atlas.back.transaction.service.event.TransactionExecuteEvent;
-import com.atlas.back.transaction.service.exception.FraudCheckException;
 import com.atlas.back.transaction.service.factory.TransactionFactory;
 import com.atlas.back.transaction.service.fee.FeeCalcuilator;
-import com.atlas.back.transaction.service.fraud.FraudCheckResult;
-import com.atlas.back.transaction.service.fraud.FraudChecker;
 import com.atlas.back.transaction.validation.chain.TransferValidation;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.nio.charset.CharacterCodingException;
 import java.util.List;
 
 @Service
 public class TransferService extends TransactionProcessor<TransferContext> implements ITransferService {
 
-    private final AccountRepository accountRepository;
+    private final DomainAccountRepository accountRepository;
     private final List<FeeCalcuilator> feeCalcuilators;
-    private final ApplicationEventPublisher eventPublisher;
     private final List<TransferValidation> validators;
     private final TransferDomainService transferDomainService;
 
-    public TransferService(TransactionRepository transactionRepository, AccountRepository accountRepository,
+    public TransferService(TransactionRepository transactionRepository, DomainAccountRepository accountRepository,
                            List<FeeCalcuilator> feeCalcuilators, ApplicationEventPublisher eventPublisher,
                            List<TransferValidation> validators, TransferDomainService transferDomainService) {
         super(transactionRepository);
         this.accountRepository = accountRepository;
         this.feeCalcuilators = feeCalcuilators;
-        this.eventPublisher = eventPublisher;
         this.validators = validators;
         this.transferDomainService = transferDomainService;
     }
@@ -56,19 +46,8 @@ public class TransferService extends TransactionProcessor<TransferContext> imple
 
         Transaction transaction = process(new TransferContext(from, to, amount));
 
-        transaction.advanceTo(transaction.getState().validate());
-        transaction.advanceTo(transaction.getState().execute());
+        transaction.executeTranfer();
         transactionRepository.save(transaction);
-
-        eventPublisher.publishEvent(new TransactionExecuteEvent(transaction.getId(),
-                transaction.getType().name(),
-                transaction.getSourceAccountId(),
-                transaction.getTargetAccountId(),
-                transaction.getAmount(),
-                transaction.getFee()
-
-
-        ));
 
         return transaction;
     }

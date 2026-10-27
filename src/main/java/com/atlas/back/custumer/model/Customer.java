@@ -1,6 +1,7 @@
 package com.atlas.back.custumer.model;
 
 
+import com.atlas.back.shared.model.Email;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -24,7 +25,7 @@ public class Customer {
 
     @Embedded
     @AttributeOverride(name = "value", column = @Column(name = "email", nullable = false, unique = true))
-    private String email;
+    private Email email;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)

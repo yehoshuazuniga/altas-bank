@@ -1,6 +1,7 @@
 package com.atlas.back.account.model;
 
 import com.atlas.back.shared.model.Currency;
+import com.atlas.back.shared.model.Email;
 import com.atlas.back.shared.model.Money;
 import com.atlas.back.transaction.exception.InsufficientFundsException;
 import jakarta.persistence.*;
@@ -28,8 +29,9 @@ public class Account {
     @Column(name = "owner_name", nullable = false)
     private String ownerName;
 
-    @Column(nullable = false)
-    private String email;
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "email", nullable = false))
+    private Email email;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
@@ -63,20 +65,20 @@ public class Account {
         if (balance == null) balance = Money.zero(Currency.EUR);
     }
 
-    public void deposit(Money amount){
-        if(amount.isNegative()){
+    public void deposit(Money amount) {
+        if (amount.isNegative()) {
             throw new IllegalArgumentException("El monto a depositar no puede ser negativo");
         }
 
         balance = balance.add(amount);
     }
 
-    public void withdraw(Money amount){
-        if(amount.isNegative()){
+    public void withdraw(Money amount) {
+        if (amount.isNegative()) {
             throw new IllegalArgumentException("El monto a retirar no puede ser negativo");
         }
 
-        if(balance.isLessThan(amount)){
+        if (balance.isLessThan(amount)) {
             throw new InsufficientFundsException(id, balance.getAmount(), amount.getAmount());
         }
 
