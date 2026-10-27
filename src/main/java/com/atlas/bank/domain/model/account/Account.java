@@ -62,4 +62,11 @@ public class Account {
 
         balance = balance.subtract(amount);
     }
+
+    public void initDefaults() {
+        if (status == null) status = AccountStatus.ACTIVE;
+        if (balance == null) balance = Money.zero(Currency.EUR);
+        if (createdAt == null) createdAt = LocalDateTime.now();
+    }
+
 }
