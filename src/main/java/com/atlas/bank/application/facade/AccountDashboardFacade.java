@@ -1,11 +1,12 @@
-package com.atlas.bank.infrastructure.adapter.in.rest;
+package com.atlas.bank.application.facade;
 
 import com.atlas.bank.application.port.in.GetAccountUseCase;
 import com.atlas.bank.application.port.in.GetTransactionByAccountUseCase;
-import com.atlas.bank.infrastructure.adapter.in.rest.dto.DashboardResponse;
+import com.atlas.bank.application.query.DashboardReadModel;
+import com.atlas.bank.application.query.GetAccountStatementQuery;
+import com.atlas.bank.application.query.TransactionReadModel;
 import com.atlas.bank.domain.model.account.Account;
 import com.atlas.bank.infrastructure.adapter.in.rest.dto.TransactionMapper;
-import com.atlas.bank.infrastructure.adapter.in.rest.dto.TransactionResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,25 +20,22 @@ public class AccountDashboardFacade {
     private final GetTransactionByAccountUseCase transactionQueryService;
     private final TransactionMapper transactionMapper;
 
-    public DashboardResponse getDashboard(Long accointId){
+    public DashboardReadModel getDashboard(Long accountId){
 
-        Account account = accountService.findById(accointId);
+        Account account = accountService.findById(accountId);
 
-        List<TransactionResponse> transaction = transactionQueryService
-                .getByAccountId(accointId)
-                .stream()
-                .map(transactionMapper::toResponse)
-                .toList();
+        List<TransactionReadModel> transactions = transactionQueryService
+                .getByAccountId(new GetAccountStatementQuery(accountId));
 
 
-        return DashboardResponse.builder()
+        return DashboardReadModel.builder()
                 .accountId(account.getId())
                 .accountNumber(account.getAccountNumber())
                 .ownerName(account.getOwnerName())
                 .type(account.getType().name())
                 .balance(account.getBalance().getAmount())
                 .status(account.getStatus().name())
-                .recentTransactions(transaction)
+                .recentTransactions(transactions)
                 .build()
                 ;
 

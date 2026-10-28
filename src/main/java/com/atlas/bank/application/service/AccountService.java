@@ -1,10 +1,14 @@
 package com.atlas.bank.application.service;
 
+import com.atlas.bank.application.command.CreateAccountCommand;
 import com.atlas.bank.application.port.in.CreateAccountUseCase;
 import com.atlas.bank.application.port.in.GetAccountUseCase;
 import com.atlas.bank.application.port.in.ListAccountuseCase;
 import com.atlas.bank.application.port.out.AccountrepositoryPort;
 import com.atlas.bank.domain.model.account.Account;
+import com.atlas.bank.domain.model.shared.Currency;
+import com.atlas.bank.domain.model.shared.Email;
+import com.atlas.bank.domain.model.shared.Money;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -20,7 +24,15 @@ public class AccountService implements CreateAccountUseCase , ListAccountuseCase
 
     @Override
     @Transactional
-    public Account create(Account account) {
+    public Account create(CreateAccountCommand command) {
+        Account account = Account.builder()
+                .accountNumber(command.accountNumber())
+                .ownerName(command.ownerName())
+                .email(Email.of(command.email()))
+                .type(command.type())
+                .balance(Money.of(command.balance(), Currency.EUR))
+                .build();
+
         return accountRepository.save(account);
     }
 

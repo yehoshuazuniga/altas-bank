@@ -2,6 +2,8 @@ package com.atlas.bank.application.service;
 
 import com.atlas.bank.application.port.in.GetTransactionByAccountUseCase;
 import com.atlas.bank.application.port.out.TransactionRepositoryPort;
+import com.atlas.bank.application.query.GetAccountStatementQuery;
+import com.atlas.bank.application.query.TransactionReadModel;
 import com.atlas.bank.domain.model.transaction.Transaction;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,9 +15,25 @@ import java.util.List;
 public class TransactionQueryService implements GetTransactionByAccountUseCase {
 
     private final TransactionRepositoryPort transactionRepository;
-@Override
-    public List<Transaction> getByAccountId(Long accountId) {
+
+    @Override
+    public List<TransactionReadModel> getByAccountId(GetAccountStatementQuery query) {
         return transactionRepository
-                .findBySourceAccountIdOrTargetAccountId(accountId, accountId);
+                .findBySourceAccountIdOrTargetAccountId(query.accountId(), query.accountId())
+                .stream().map(this::toReadModel).toList();
+    }
+
+    private TransactionReadModel toReadModel(Transaction transaction) {
+        return new TransactionReadModel(
+                transaction.getId(),
+                transaction.getType().name(),
+                transaction.getSourceAccountId(),
+                transaction.getTargetAccountId(),
+                transaction.getAmount(),
+                transaction.getFee(),
+                transaction.getStatus().name(),
+                transaction.getCreatedAt()
+        );
+
     }
 }

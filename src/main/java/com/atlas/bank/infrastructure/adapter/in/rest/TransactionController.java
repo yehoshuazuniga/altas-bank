@@ -1,11 +1,14 @@
 package com.atlas.bank.infrastructure.adapter.in.rest;
 
+import com.atlas.bank.application.command.TransferMoneyCommand;
 import com.atlas.bank.application.port.in.GetTransactionByAccountUseCase;
 import com.atlas.bank.application.port.in.TransferMoneyUseCase;
+import com.atlas.bank.application.query.GetAccountStatementQuery;
+import com.atlas.bank.application.query.TransactionReadModel;
+import com.atlas.bank.domain.model.transaction.Transaction;
 import com.atlas.bank.infrastructure.adapter.in.rest.dto.TransactionMapper;
 import com.atlas.bank.infrastructure.adapter.in.rest.dto.TransactionResponse;
 import com.atlas.bank.infrastructure.adapter.in.rest.dto.TransferRequest;
-import com.atlas.bank.domain.model.transaction.Transaction;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -24,21 +27,25 @@ public class TransactionController {
 
     @PostMapping("/transfer")
     public ResponseEntity<TransactionResponse> transfer(@RequestBody @Valid TransferRequest transferRequest) {
+
+        TransferMoneyCommand command = TransferMoneyCommand.builder()
+                .fromId(transferRequest.getFromAccountId())
+                .toId(transferRequest.getToAccountId())
+                .amount(transferRequest.getAmount())
+                .build();
+
         Transaction transaction = transferService
-                .transfer(transferRequest.getFromAccountId(),
-                        transferRequest.getToAccountId(),
-                        transferRequest.getAmount());
-
-
+                .transfer(command);
 
         return ResponseEntity.ok(transactionMapper.toResponse(transaction));
     }
 
     @GetMapping("/{id}/transactions")
-    public ResponseEntity<List<TransactionResponse>> getTransaction(@PathVariable Long id) {
-        List<TransactionResponse> responses = queryService.getByAccountId(id).stream()
-                .map(transactionMapper::toResponse)
-                .toList();
+    public ResponseEntity<List<TransactionReadModel>> getTransaction(@PathVariable Long id) {
+
+        GetAccountStatementQuery query = new GetAccountStatementQuery(id);
+
+        List<TransactionReadModel> responses = queryService.getByAccountId(query);
         return ResponseEntity.ok(responses);
     }
 }

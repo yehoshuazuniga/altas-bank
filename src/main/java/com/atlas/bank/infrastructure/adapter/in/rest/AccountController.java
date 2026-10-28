@@ -1,13 +1,15 @@
 package com.atlas.bank.infrastructure.adapter.in.rest;
 
+import com.atlas.bank.application.command.CreateAccountCommand;
+import com.atlas.bank.application.facade.AccountDashboardFacade;
 import com.atlas.bank.application.port.in.CreateAccountUseCase;
 import com.atlas.bank.application.port.in.GetAccountUseCase;
 import com.atlas.bank.application.port.in.ListAccountuseCase;
+import com.atlas.bank.application.query.DashboardReadModel;
+import com.atlas.bank.domain.model.account.Account;
 import com.atlas.bank.infrastructure.adapter.in.rest.dto.AccountMapper;
 import com.atlas.bank.infrastructure.adapter.in.rest.dto.AccountResponse;
 import com.atlas.bank.infrastructure.adapter.in.rest.dto.CreateAccountRequest;
-import com.atlas.bank.infrastructure.adapter.in.rest.dto.DashboardResponse;
-import com.atlas.bank.domain.model.account.Account;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -28,15 +30,21 @@ public class AccountController {
     private final AccountDashboardFacade accountDashboardFacade;
 
     @GetMapping("/{id}/dasboard")
-    public ResponseEntity<DashboardResponse> getDasboardAccount(@PathVariable Long id){
+    public ResponseEntity<DashboardReadModel> getDasboardAccount(@PathVariable Long id){
         return ResponseEntity.ok(accountDashboardFacade.getDashboard(id));
     }
 
     @PostMapping
     public ResponseEntity<AccountResponse> create(@RequestBody @Valid CreateAccountRequest request) {
-        Account account = accountMapper.toEntity(request);
+        CreateAccountCommand command = CreateAccountCommand.builder()
+                .accountNumber(request.getAccountNumber())
+                .ownerName(request.getOwnerName())
+                .email(request.getEmail())
+                .type(request.getType())
+                .balance(request.getBalance())
+                .build();
 
-        Account saved = createAccountUseCase.create(account);
+        Account saved = createAccountUseCase.create(command);
         return ResponseEntity.status(HttpStatus.CREATED).body(accountMapper.toResponse(saved));
     }
 

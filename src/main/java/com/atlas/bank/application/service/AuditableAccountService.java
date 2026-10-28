@@ -1,5 +1,6 @@
 package com.atlas.bank.application.service;
 
+import com.atlas.bank.application.command.CreateAccountCommand;
 import com.atlas.bank.application.port.in.CreateAccountUseCase;
 import com.atlas.bank.application.port.in.GetAccountUseCase;
 import com.atlas.bank.application.port.in.ListAccountuseCase;
@@ -29,11 +30,11 @@ public class AuditableAccountService implements CreateAccountUseCase, ListAccoun
         this.getAccountUseCase = getAccountUseCase;
     }
 
-    public Account create(Account account) {
+    public Account create(CreateAccountCommand command) {
         log.info("Creando cuenta — número: {}, titular: {}",
-                account.getAccountNumber(), account.getOwnerName());
+                command.accountNumber(), command.ownerName());
 
-        Account created = createAccountUseCase.create(account);
+        Account created = createAccountUseCase.create(command);
 
         log.info("Cuenta creada exitosamente — ID: {}", created.getId());
 
