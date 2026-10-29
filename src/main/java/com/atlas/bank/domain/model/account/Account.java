@@ -1,6 +1,7 @@
 package com.atlas.bank.domain.model.account;
 
 import com.atlas.bank.domain.model.shared.Currency;
+import com.atlas.bank.domain.exception.AccountNotActiveException;
 import com.atlas.bank.domain.exception.InsufficientFundsException;
 import com.atlas.bank.domain.model.shared.Email;
 import com.atlas.bank.domain.model.shared.Money;
@@ -61,6 +62,18 @@ public class Account {
         }
 
         balance = balance.subtract(amount);
+    }
+
+    public void close() {
+        if (status != AccountStatus.ACTIVE) {
+            throw new AccountNotActiveException(id, String.valueOf(status));
+        }
+
+        if (balance == null || !balance.isZero()) {
+            throw new IllegalStateException("No se puede cerrar una cuenta con saldo");
+        }
+
+        this.status = AccountStatus.CLOSED;
     }
 
     public void initDefaults() {

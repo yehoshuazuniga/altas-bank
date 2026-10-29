@@ -55,6 +55,10 @@ public class Money {
         return this.amount.compareTo(BigDecimal.ZERO) < 0;
     }
 
+    public boolean isZero() {
+        return this.amount.compareTo(BigDecimal.ZERO) == 0;
+    }
+
     private void validateSameCurrency(Money other) {
         if (currency != other.currency) {
             throw new IllegalArgumentException("No se pueden operar montos en monedas distintas: "

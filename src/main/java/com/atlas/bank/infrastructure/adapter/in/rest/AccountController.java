@@ -1,7 +1,9 @@
 package com.atlas.bank.infrastructure.adapter.in.rest;
 
+import com.atlas.bank.application.command.CloseAccountCommand;
 import com.atlas.bank.application.command.CreateAccountCommand;
 import com.atlas.bank.application.facade.AccountDashboardFacade;
+import com.atlas.bank.application.port.in.CloseAccountUseCase;
 import com.atlas.bank.application.port.in.CreateAccountUseCase;
 import com.atlas.bank.application.port.in.GetAccountUseCase;
 import com.atlas.bank.application.port.in.ListAccountuseCase;
@@ -14,6 +16,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,6 +29,7 @@ public class AccountController {
     private final CreateAccountUseCase createAccountUseCase;
     private final ListAccountuseCase listAccountuseCase;
     private final GetAccountUseCase getAccountUseCase;
+    private final CloseAccountUseCase closeAccountUseCase;
     private final AccountMapper accountMapper;
     private final AccountDashboardFacade accountDashboardFacade;
 
@@ -46,6 +50,17 @@ public class AccountController {
 
         Account saved = createAccountUseCase.create(command);
         return ResponseEntity.status(HttpStatus.CREATED).body(accountMapper.toResponse(saved));
+    }
+
+    @PatchMapping("/{id}/close")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<AccountResponse> close(@PathVariable Long id) {
+        CloseAccountCommand command = CloseAccountCommand.builder()
+                .accountId(id)
+                .build();
+
+        Account closed = closeAccountUseCase.close(command);
+        return ResponseEntity.ok(accountMapper.toResponse(closed));
     }
 
     @GetMapping

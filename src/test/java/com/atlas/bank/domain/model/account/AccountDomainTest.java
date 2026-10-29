@@ -1,6 +1,7 @@
 package com.atlas.bank.domain.model.account;
 
 
+import com.atlas.bank.domain.exception.AccountNotActiveException;
 import com.atlas.bank.domain.exception.InsufficientFundsException;
 import com.atlas.bank.domain.model.shared.Currency;
 import com.atlas.bank.domain.model.shared.Email;
@@ -80,6 +81,42 @@ class AccountDomainTest {
         assertThrows(IllegalArgumentException.class, () ->
                 account.deposit(negative)
         );
+    }
+
+    @Test
+    @DisplayName("Debe cerrar una cuenta activa sin saldo")
+    void shouldCloseActiveAccountWithZeroBalance() {
+        // Arrange
+        Account account = createAccountWithBalance(BigDecimal.ZERO);
+
+        // Act
+        account.close();
+
+        // Assert
+        assertEquals(AccountStatus.CLOSED, account.getStatus());
+    }
+
+    @Test
+    @DisplayName("Debe rechazar cierre cuando la cuenta tiene saldo")
+    void shouldRejectCloseWhenAccountHasBalance() {
+        // Arrange
+        Account account = createAccountWithBalance(new BigDecimal("100.00"));
+
+        // Act & Assert
+        IllegalStateException exception = assertThrows(IllegalStateException.class, account::close);
+        assertEquals("No se puede cerrar una cuenta con saldo", exception.getMessage());
+        assertEquals(AccountStatus.ACTIVE, account.getStatus());
+    }
+
+    @Test
+    @DisplayName("Debe rechazar cierre cuando la cuenta no está activa")
+    void shouldRejectCloseWhenAccountIsNotActive() {
+        // Arrange
+        Account account = createAccountWithBalance(BigDecimal.ZERO);
+        account.setStatus(AccountStatus.CLOSED);
+
+        // Act & Assert
+        assertThrows(AccountNotActiveException.class, account::close);
     }
 
     @Test
