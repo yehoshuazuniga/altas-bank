@@ -22,7 +22,7 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(  auth -> auth
                         //Accounts
-                        .requestMatchers( HttpMethod.POST, "/api/v1/accounts" ).hasRole("ADMIN")
+                        .requestMatchers( HttpMethod.POST, "/api/v1/accounts" ).hasAnyRole("ADMIN", "USER")
                         .requestMatchers( HttpMethod.GET, "/api/v1/accounts" ).hasRole("ADMIN")
                         .requestMatchers( HttpMethod.GET, "/api/v1/accounts/{id}" ).hasAnyRole("USER","ADMIN")
 

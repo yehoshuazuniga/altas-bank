@@ -1,14 +1,10 @@
 spring:
   ai:
-    apenai:
+    openai:
       api-key: ollama
       base-url: http://localhost:11434/v1
       chat:
         model: qwen3:8b
-
-  application:
-    name: atlas-bank
-
   datasource:
     url: jdbc:h2:mem:atlasbank
     driver-class-name: org.h2.Driver
@@ -29,4 +25,4 @@ spring:
         jwt:
           issuer-uri: http://localhost:8080/realms/atlas-bank
 server:
-  port: 8080
+  port: 8085
