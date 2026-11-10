@@ -1,6 +1,7 @@
 package com.atlas.bank.infrastructure.adapter.listener;
 
 
+import com.atlas.bank.domain.event.AccountClosedEvent;
 import com.atlas.bank.domain.event.TransactionExecuteEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
@@ -14,6 +15,12 @@ public class NotificationListener {
     public void onTransactionExecute(TransactionExecuteEvent event) {
         log.info("Enviado comprobante de {} por ${} - Transaccion #{}",
         event.type(), event.amount(), event.transactionId());
+    }
+
+    @EventListener
+    public void onAccountClosed(AccountClosedEvent event) {
+        log.info("Enviada notificacion de cierre de cuenta #{} ({})",
+                event.accountId(), event.accountNumber());
     }
 
 }
