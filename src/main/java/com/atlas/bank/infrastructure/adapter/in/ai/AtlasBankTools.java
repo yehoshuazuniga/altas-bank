@@ -1,9 +1,11 @@
 package com.atlas.bank.infrastructure.adapter.in.ai;
 
+import com.atlas.bank.application.command.CloseAccountCommand;
 import com.atlas.bank.application.command.TransferMoneyCommand;
 import com.atlas.bank.application.port.in.CloseAccountUseCase;
 import com.atlas.bank.application.port.in.GetAccountUseCase;
 import com.atlas.bank.application.port.in.TransferMoneyUseCase;
+import com.atlas.bank.domain.exception.AccountNotActiveException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
@@ -53,6 +55,27 @@ public class AtlasBankTools {
                     + " " + account.getBalance().getCurrency();
         } catch (Exception e) {
             return "No se pudo consultar la cuenta: " + e.getMessage();
+        }
+    }
+
+    @Tool(description = "Cerrar una cuenta del banco atlas-bank. La cuenta debe estar activa y sin saldo")
+    public String closeAccount(
+            @ToolParam(description = "ID de la cuenta a cerrar") String accountId
+    ) {
+        try {
+            var command = CloseAccountCommand.builder()
+                    .accountId(Long.parseLong(accountId))
+                    .build();
+            var account = closeAccountUseCase.close(command);
+
+            return "Cuenta " + account.getAccountNumber() + " cerrada con éxito. Estado: " + account.getStatus();
+
+        } catch (AccountNotActiveException e) {
+            return "No se pudo cerrar la cuenta, la cuenta no está activa: " + e.getMessage();
+        } catch (IllegalStateException e) {
+            return "No se pudo cerrar la cuenta: " + e.getMessage();
+        } catch (Exception e) {
+            return "Error al procesar el cierre de la cuenta: " + e.getMessage();
         }
     }
 
