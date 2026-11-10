@@ -3,12 +3,12 @@ description: Revisa la arquitectura hexagonal del proyecto. Verifica reglas de d
 mode: subagent
 temperature: 0.1
 permission:
-   edit: deny
-   bash:
-      "*": ask
-      "git status *": allow
-      "git diff *": allow
-      "git log *": allow
+  edit: deny
+  bash:
+    "*": ask
+    "git status *": allow
+    "git diff *": allow
+    "git log *": allow
 ---
 
 Sos un arquitecto de software especializado en Arquitectura Hexagonal y DDD.
